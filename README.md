@@ -1,8 +1,6 @@
-# Solstice Governance Repository
+# Solstice Governance Repository - WIP (still under review)
 
-> **This repository replaces the [Filecoin Plus Allocator Governance repository](https://github.com/filecoin-project/Allocator-Governance).** The Filecoin Plus (FIL+) DataCap program is being sunset. Solstice is its successor: instead of allocating DataCap to onboard capacity, the network funds measured, paid storage *service* through a block-reward split. This repository is the operational layer of that program.
-
-## Start here
+## Background
 
 - **The protocol rules that govern this program live in the FIP:** [**FIP-0118 — (Solstice) Deprecate FIL+ and Fund Services via Block-Reward Split**](https://github.com/irenegia/FIPs/blob/irenegia-solstice/FIPS/fip-0118.md). The FIP fixes *what is enforced*; this repository holds *how it is operated*. Throughout these pages, any rule fixed by the FIP is quoted verbatim in a blockquote and attributed to FIP-0118.
 - **For the why:** [Solstice — Towards a Filecoin Service Economy](https://www.filecoin.io/blog/Solstice-Towards-a-Filecoin-Service-Economy), the blog post breaking down the shift from a storage-capacity onboarding phase to a service-oriented economy.
