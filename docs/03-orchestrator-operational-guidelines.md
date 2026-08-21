@@ -33,7 +33,7 @@ Each policy notes where it is enforced:
 | # | Policy | Enforced |
 | :-- | :-- | :-- |
 | 1 | The program is open to any entity that routes paid storage service revenue through admitted settlement rails on behalf of clients. Admission is discretionary in Phase 1, scored against the admission rubric; a future FIP makes admission permissionless in Phase 2. | Repository |
-| 2 | Qualifying volume is settlement through admitted Filecoin Pay contracts, in admitted stablecoins or FIL converted at the configured oracle, attributable to the orchestrator's registered (payer, operator) pairs. Nothing else counts. | Contract |
+| 2 | Qualifying volume is settlement through admitted Filecoin Pay contracts, in admitted stablecoins or FIL converted off-chain via the reference indexer using public fee-auction prints (`MIN_LOT`, `PRICE_BAND`), attributable to the orchestrator's registered (payer, operator) pairs. Nothing else counts. | Contract |
 | 3 | A (payer, operator) pair binds to exactly one orchestrator. Registering a pair already bound elsewhere reverts. Clients are free to work with multiple orchestrators across different operator relationships; the pair, not the client, is the unit of attribution. | FIP |
 | 4 | Volume counts only for pairs registered before the settlement occurs. Retroactive attribution is not accepted. | Repository |
 | 5 | Each quarter, orchestrators post FPV within `POST_PERIOD`. A value neither posted nor corrected during `VERIFICATION_WINDOW` binds at zero. Bound values are final; a successful appeal affects later quarters only. | FIP and contract |
@@ -97,7 +97,7 @@ Volume counts only when it settles on an admitted Filecoin Pay contract, in an a
 
 > **Cadence:** measurement quarterly · payout each epoch · **On-chain call:** `PostVolume` (measurement)
 
-1. Understand your figure: FPV_i(Q) is the value settled on your registered (payer, operator) rails during a given quarter; amounts are denominated in USD — admitted stablecoins at face value, FIL converted at the configured oracle (30-day TWAP).
+1. Understand your figure: FPV_i(Q) is the value settled on your registered (payer, operator) rails during a given quarter; amounts are denominated in USD — admitted stablecoins at face value, FIL converted off-chain via the reference indexer using public fee-auction prints (`MIN_LOT`, `PRICE_BAND`).
 2. Declare how your volume is measured (your pairs, optional service-contract metadata, booked-revenue basis).
 3. Funds are received automatically: f02 pays your controlling wallet its share of the service stream (w1) directly, every epoch — no invoice and no claims are required.
 
@@ -128,7 +128,7 @@ Rewards land in your controlling wallet each epoch; deploying them against your 
 
 > **Cadence:** quarterly (`POST_PERIOD`, then `VERIFICATION_WINDOW`) · **On-chain call:** `PostVolume`
 
-1. Within `POST_PERIOD`, post your figure via `PostVolume` as two components (admitted-stablecoin USD at face value; FIL in attoFIL).
+1. Within `POST_PERIOD`, post your figure via `PostVolume` as a single USD-denominated total, with FIL volume converted off-chain by the indexer per the fee-auction pricing rule.
 2. During `VERIFICATION_WINDOW`, recompute your own FPV from public settlement events using the reference indexer and reconcile it against what you posted; flag any discrepancy proactively.
 3. Keep your declaration file (pairs, contact, measurement rules) current.
 4. Remember the failure mode: a value neither posted nor corrected binds at zero (a conservative under-count); bound values are final, and a successful appeal affects later quarters only.

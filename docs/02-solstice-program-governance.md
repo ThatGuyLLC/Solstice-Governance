@@ -332,11 +332,11 @@ Full procedure and evidence standards: [§3.4.2](03-orchestrator-operational-gui
 </details>
 
 <details>
-<summary><strong>2.3.10 — Maintain admitted lists & oracle config (SetAdmittedLists, oracle settings)</strong></summary>
+<summary><strong>2.3.10 — Maintain admitted lists & fee-auction parameters (SetAdmittedLists, pricing settings)</strong></summary>
 
 > **Requires:** both SRA Safes · **Hold:** `SRA_CANCEL_HOLD` · **Enforced by:** SRA · **Cancel:** either SRA Safe · **No FIP**
 
-Standard registry-change flow for the admitted-stablecoin whitelist, the admitted Filecoin Pay contract addresses, and the FIL/USD oracle configuration (feed address, staleness threshold). These are gate-consequential, so they are held like any registry change — never a silent edit.
+Standard registry-change flow for the admitted-stablecoin whitelist, the admitted Filecoin Pay contract addresses, and the fee-auction pricing parameters (`MIN_LOT`, `PRICE_BAND`). These are gate-consequential, so they are held like any registry change — never a silent edit.
 
 </details>
 
@@ -453,7 +453,7 @@ Each organization runs a separate Safe per tier — four accounts in total — s
 | Dispute resolution target ([§3.4.2](03-orchestrator-operational-guidelines.md#342-dispute-resolution-for-contested-bindings)) | This repository | 7 days |
 | Orchestrator response window ([§3.4.5](03-orchestrator-operational-guidelines.md#345-escalation)) | This repository | 72 hours |
 | Admitted-stablecoin whitelist | This repository | TBD |
-| FIL/USD oracle feed and staleness threshold | This repository | TBD |
+| Fee-auction pricing parameters (`MIN_LOT`, `PRICE_BAND`) | This repository | TBD |
 | Admission rubric | This repository | TBD, after the first application cycle |
 
 > `SWA_TIMELOCK` is FIP-fixed and enforced in L1:
