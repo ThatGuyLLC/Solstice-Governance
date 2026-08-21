@@ -1,6 +1,6 @@
 # 3. Orchestrator Operational Guidelines
 
-> Part of the [Solstice Governance Repository](../README.md). Protocol rules are fixed by [**FIP-0118**](https://github.com/irenegia/FIPs/blob/irenegia-solstice/FIPS/fip-0118.md) and quoted verbatim where referenced.
+> Part of the [Solstice Governance Repository](../README.md). Protocol rules are fixed by [**FIP-0118**](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md) and referenced throughout.
 
 This section consolidates what is expected of Orchestrators (the operational guidelines) and how declarations are verified and escalated.
 

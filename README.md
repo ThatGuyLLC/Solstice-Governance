@@ -2,13 +2,17 @@
 
 ## Background
 
-- **The protocol rules that govern this program live in the FIP:** [**FIP-0118 — (Solstice) Deprecate FIL+ and Fund Services via Block-Reward Split**](https://github.com/irenegia/FIPs/blob/irenegia-solstice/FIPS/fip-0118.md). The FIP fixes *what is enforced*; this repository holds *how it is operated*. Throughout these pages, any rule fixed by the FIP is quoted verbatim in a blockquote and attributed to FIP-0118.
+- **The protocol rules that govern this program live in the FIP:** [**FIP-0118 — (Solstice) Deprecate FIL+ and Fund Services via Block-Reward Split**](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md). The FIP fixes *what is enforced*; this repository holds *how it is operated*. Throughout these pages, any rule fixed by the FIP is quoted verbatim in a blockquote and attributed to FIP-0118.
 - **For the why:** [Solstice — Towards a Filecoin Service Economy](https://www.filecoin.io/blog/Solstice-Towards-a-Filecoin-Service-Economy), the blog post breaking down the shift from a storage-capacity onboarding phase to a service-oriented economy.
 - **Discussion:** [FIP-0118 discussion thread](https://github.com/filecoin-project/FIPs/discussions/1249).
 
 > From the FIP-0118 Simple Summary:
 >
-> > This proposal removes the Filecoin Plus datacap system and replaces it with an automated mechanism. All new storage sectors receive equal 10× power at the protocol level. The block reward is then split into three streams—consensus (paid to miners), service (paid to registered orchestrators), and burn—with weights that adjust based on verifiable on-chain payment volume from Filecoin Pay.
+> > This FIP deprecates the Filecoin Plus (Fil+) datacap minting and allocation system and replaces it with a two-part mechanism:
+> >
+> > - **PoRep sector quality no longer depends on content at L1.** Every new sector onboarded from the activation epoch automatically receives 10× QAP over its lifetime, realized immediately at onboarding regardless of content. Provisions are also made for upgrading existing sectors to 10× QAP. The initial pledge mechanism is unchanged.
+> >
+> > - **The block reward is split into streams.** At each block-reward issuance the minted reward is divided into named streams: Service stream (pays registered Service Orchestrators proportional to on-chain service volume via Service Rewards Actor), Consensus stream (pays winning miner), and Burn stream (pays burn actor).
 
 ## How this document maps to the repository
 
@@ -53,11 +57,11 @@ Changes happen by pull request with public review — covering, but not limited 
 
 ## 1.5 Reference Links (TBD)
 
-- FIP text: [FIP-0118](https://github.com/irenegia/FIPs/blob/irenegia-solstice/FIPS/fip-0118.md) *(number pending final assignment)*
+- FIP text: [FIP-0118](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md)
 - Governance meetings: TBD (not mandatory)
 - Reference indexer: TBD
 - Settlement data and dashboards: TBD
 
 ---
 
-*Solstice Governance Repository — operational layer of [FIP-0118](https://github.com/irenegia/FIPs/blob/irenegia-solstice/FIPS/fip-0118.md).*
+*Solstice Governance Repository — operational layer of [FIP-0118](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md).*

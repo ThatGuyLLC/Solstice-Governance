@@ -4,7 +4,7 @@
 
 ## 4.1 How changes are classified
 
-Per [FIP-0118](https://github.com/irenegia/FIPs/blob/irenegia-solstice/FIPS/fip-0118.md) and [README §1.3](../README.md#13-what-requires-a-fip), there are three tiers of change; every entry below is tagged with one:
+Per [FIP-0118](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md) and [README §1.3](../README.md#13-what-requires-a-fip), there are three tiers of change; every entry below is tagged with one:
 
 | Type | What it covers | How it is enacted |
 | :-- | :-- | :-- |
@@ -20,7 +20,7 @@ Each entry should link: (a) the **community issue / discussion** that raised the
 
 | Date | Change | Type | Community issue / discussion | FIP | PR / commit | Status |
 | :-- | :-- | :-- | :-- | :-- | :-- | :-- |
-| 2026 (pending) | Establishment of the Solstice program and this governance repository; deprecation of Filecoin Plus. | FIP + Network upgrade | [FIP-0118 discussion](https://github.com/filecoin-project/FIPs/discussions/1249) | [FIP-0118](https://github.com/irenegia/FIPs/blob/irenegia-solstice/FIPS/fip-0118.md) | Initial repository | Draft |
+| 2026 (pending) | Establishment of the Solstice program and this governance repository; deprecation of Filecoin Plus. | FIP + Network upgrade | [FIP-0118 discussion](https://github.com/filecoin-project/FIPs/discussions/1249) | [FIP-0118](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md) | Initial repository | Draft |
 
 ## 4.3 Entry template
 
