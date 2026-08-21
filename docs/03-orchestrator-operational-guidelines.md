@@ -99,7 +99,7 @@ Volume counts only when it settles on an admitted Filecoin Pay contract, in an a
 
 1. Understand your figure: FPV_i(Q) is the value settled on your registered (payer, operator) rails during a given quarter; amounts are denominated in USD — admitted stablecoins at face value, FIL converted at the configured oracle (30-day TWAP).
 2. Declare how your volume is measured (your pairs, optional service-contract metadata, booked-revenue basis).
-3. Funds are received automatically: f02 pays your controlling wallet its share of the service stream (w1) directly, every epoch — no invoice and no claims are required.
+3. Receiving service stream payouts: f02 accrues your controlling wallet its share of the service stream (w2) every epoch. Entitlements are withdrawn via the permissionless `Claim` method by your wallet or a keeper.
 
 The following rule establishes how the share is set: `SplitRule` = your bound FPV_i(Q) ÷ AggregatedFPV(Q), written into f02 once per quarter via `SetShares`.
 
