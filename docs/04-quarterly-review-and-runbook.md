@@ -1,6 +1,6 @@
 # 4. Quarterly Review and Runbook
 
-> Part of the [Solstice Governance Repository](../README.md). Protocol rules are fixed by [**FIP-0118**](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md) and referenced throughout.
+> Part of the [Solstice Governance Repository](../README.md). Protocol rules are fixed by [**FIP-0118**](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md) and referenced throughout. Quotations of FIP-0118 are copied from the commit pinned in the [README](../README.md).
 
 This section is the runbook for the quarterly review: the community reporting and disclosure duty every Orchestrator must complete each quarter ([§4.1](#41-community-reporting-and-disclosure)), the report **template** to fill ([§4.2](#42-quarterly-report-template)), a worked **example** ([§4.3](#43-example)), and the declaration, verification and escalation process ([§4.4](#44-declaration-verification-and-escalation)). Completed reports are archived in [Section 5, Quarterly Reports](05-quarterly-reports.md).
 
@@ -25,7 +25,7 @@ Per [§3.1, Policy 9](03-orchestrator-operational-guidelines.md#31-policies), th
 4. Filing deadline: within **7 days after the verification window closes** (after values bind — posting is 3 days then verification 7 days). The reported FPV must match the **bound** value (the `PostVolume` figure, or the `VolumeCorrected` figure if SRA corrected it in-window). A **zero quarter** (no `PostVolume`, because the contract rejects zero) reports bound value 0 with `no message (zero quarter)` and the indexer run as evidence.
 5. On merge, the report is listed in [Section 5, Quarterly Reports](05-quarterly-reports.md).
 
-**If a report is late or incomplete,** SRA Governance opens a public issue and the Orchestrator has the standard response window (7 days) to remedy it before the removal trigger in [§4.4.3](#443-verification-and-removal) is considered.
+**If a report is late or incomplete,** failure to file by the deadline is a removal trigger under FIP-0118 and forfeits re-admission for the following quarter. SRA Governance opens a public issue when the deadline passes. This repository does not add a cure period that moves that trigger. A later return, if the Safes admit one, is a fresh `AddOrchestrator` with a fresh application, and it is not available in the forfeited quarter ([§2.3.2](02-solstice-program-governance.md#232--remove-an-orchestrator-removeorchestrator)).
 
 ## 4.2 Quarterly report template
 
@@ -79,12 +79,11 @@ The fillable template lives at [`quarterly-reports/_TEMPLATE.md`](quarterly-repo
 
 | Parameter | Value |
 | :-- | :-- |
-| `MIN_LOT(Q)` (derived) | 250 USD |
-| `MIN_LOT_FLOOR` | 100 USD |
-| `MIN_LOT_ALPHA` | 0.5 |
+| `MIN_LOT(Q)` (derived) | 14 USD (`max($0.50, floor((1/400) * 5800 / 1))`, the FIP formula on this example's `BoundVolume` and `N`) |
+| `MIN_LOT_FLOOR` | $0.50 |
+| `MIN_LOT_ALPHA` | 1/400 |
 | `BoundVolume(Q-1)` | $5,800 |
-| `FEE_RATE` | 0.5% |
-| `PRICE_BAND` | ±10% |
+| `PRICE_BAND` | 30% |
 | `N(Q-1)` | 1 |
 | Admitted-stablecoin whitelist (in force for Q) | USDC |
 | Admitted Filecoin Pay contract addresses (as of Q) | `0xfp…01` |
@@ -137,8 +136,8 @@ The fillable template lives at [`quarterly-reports/_TEMPLATE.md`](quarterly-repo
 | Field | Value |
 | :-- | :-- |
 | What worked well this quarter | Zero-egress economics closed the media account with no discount; channel partners produced two of five accounts. |
-| What didn't work / challenges encountered | One client's payments briefly settled off an admitted rail and did not count until the pair was re-registered. | 
-| Key learnings and takeaways | Register the (payer, operator) pair at rail creation, and we lost a partial month of countable volume learning this. |
+| What didn't work / challenges encountered | One client's payments briefly settled off an admitted rail and did not count. Back-cover does not reach volume that never settled on an admitted rail. |
+| Key learnings and takeaways | Register the (payer, operator) pair when the relationship starts. Back-cover counts the pair's unbound on-rail past inside the quarter. A registration in the last `REGISTRATION_CUTOFF` of the quarter covers nothing of that quarter. |
 | Any other context (optional) | Indexer recompute matched our posted figure to the atto-USD; no correction was required in the verification window. |
 
 ### 5. Next quarter outlook
@@ -150,48 +149,72 @@ The fillable template lives at [`quarterly-reports/_TEMPLATE.md`](quarterly-repo
 
 ## 4.4 Declaration, verification and escalation
 
-### 4.4.1 Binding declarations and verification
+### 4.4.1 Two verification duties
 
-Declarations are accepted by default, and rely upon a mix of on-chain verifiable metrics and other KPIs/SLAs. Verification is dispute-driven: it is triggered only based upon provable gaps highlighted by community members. A false claim surfaces when the legitimate orchestrator's registration and performance cannot be proven via either on-chain transactions or credible probing documentation for off-chain transactions. Verification methods per our integrity guidelines are set out below.
+These are different duties. Neither is a pre-clearance of individual deals.
+
+**(a) Quarterly recomputation (SRA Governance, every quarter).** FIP-0118 §2.2 makes SRA Governance responsible for supplying the publicly recomputable value before the verification window closes. Each quarter, SRA Governance recomputes every admitted Orchestrator's `FPV_i(Q)` from public settlement events and registry state, publishes that recomputation, and follows [§2.3.4](02-solstice-program-governance.md#234--quarterly-fpv-verification--correction-correctvolume) where a posted figure differs or an Orchestrator did not post. This duty runs whether or not anyone has opened a dispute. Until a reference indexer is published, the normative algorithm is the FIP text pinned in the [README](../README.md).
+
+**(b) Exception-based audit of a business relationship.** Declarations of client relationships are accepted by default. An audit starts when a trigger in [§4.4.4](#444-what-triggers-a-verification) fires. A false binding surfaces when the registrant does not serve the client, on the evidence in [§4.4.2](#442-dispute-resolution-for-contested-bindings). This repository does not use an undefined KPI or SLA as a verification standard.
 
 FIP-0118 fixes the consequence of a misreport discovered after binding:
 
-> "There is no retroactive clawback: a misreport discovered after binding is grounds for audit or removal."
+> "There is no retroactive clawback: a misreport discovered after binding is grounds for audit or removal (Section 4)."
 
 ### 4.4.2 Dispute resolution for contested bindings
 
 1. The contesting party opens an issue in this repository identifying the pair and its claim.
 2. SRA Governance requests evidence of the client relationship from both parties. Acceptable evidence, in increasing strength: business records showing the engagement; client confirmation through a verifiable channel; a signed client attestation (a message signed by the payer wallet naming the orchestrator).
-3. Resolution target timeline: 7 days. The outcome (reassignment, removal, or no action) executes on-chain when the second SRA Safe approves (registry actions are not held and not cancellable), and is recorded in the issue.
+3. Resolution target timeline: 7 days. The outcome (reassignment, removal, or no action) is recorded on the issue with a written reason. A reassignment uses [§2.3.11](02-solstice-program-governance.md#2311--reassign-a-binding-reassignbinding), including when `inherit = true` applies. A removal uses [§2.3.2](02-solstice-program-governance.md#232--remove-an-orchestrator-removeorchestrator). The call executes on-chain when the second SRA Safe approves. Registry actions are not held and not cancellable after that approval.
+
+A figure still inside the verification window is an input to the quarterly recomputation and to `CorrectVolume`. It is not a substitute for duty (a) above.
 
 A contested `CorrectVolume` follows the same evidence process. Per the FIP, bound values are final, so the appeal outcome can only affect later quarters:
 
 > "Binding: whatever each value is when the window closes binds, and bound values are final for the quarter."
 
+`TODO(owners):` a filing deadline inside the verification window, any evidence bar beyond the list in step 2, recusal when a Safe organization is affiliated with a party ([§2.1.1](02-solstice-program-governance.md#211-standards-for-a-governance-safe-both-tiers)), and whether any appeal is heard by someone other than the SRA tier. The FIP assigns the dispute procedure to this repository and the decision to SRA Governance. This repository does not name an independent reviewer.
+
 ### 4.4.3 Verification and removal
 
-Orchestrator verifications are exception-based, per the FIP, and are never pre-clearance. A scheduled audit cycle would rebuild the review pipeline Solstice deprecates. A verification begins only when a trigger fires: a public-data anomaly, a community report filed as an issue, or a contested binding escalated from the dispute process ([4.4.2](#442-dispute-resolution-for-contested-bindings)).
+The exception audit in §4.4.1(b) is never pre-clearance. A scheduled audit of individual deals would rebuild the review pipeline Solstice deprecates. That audit begins when a trigger fires: a public-data anomaly, a community report filed as an issue, or a contested binding escalated from the dispute process ([4.4.2](#442-dispute-resolution-for-contested-bindings)). It does not replace the quarterly recomputation in §4.4.1(a).
 
-**Grounds for removal:** failure to submit completed quarterly report, misreported FPV (mechanically detectable, since FPV is recomputable from public events), and binding fraud.
+**Grounds for removal:**
+
+- Failure to file the quarterly report. The FIP makes this a removal trigger and forfeits re-admission for the following quarter.
+- Misreported FPV. The figure is recomputable from public events. Inside the verification window the remedy is `CorrectVolume`. After binding, the FIP's remedy is audit or removal, with no clawback.
+- A pattern of wrongful claims (FIP-0118, Security Considerations).
+- Binding fraud, as defined below.
+- Inactivity, only after `TODO(owners)` in [Policy 7](03-orchestrator-operational-guidelines.md#31-policies) sets the number of consecutive quarters. Until then, inactivity is not a stated ground.
+
+**Terms.** These follow the FIP. They are not extra sanctions.
+
+- **Wrongful claim.** A `RegisterPairs` binding that the dispute process finds the registrant does not serve for that client. While the quarter runs, and the displaced binding's application epoch is in the current quarter or later, the remedy is `ReassignBinding` with `inherit = true` ([§2.3.11](02-solstice-program-governance.md#2311--reassign-a-binding-reassignbinding)).
+- **Binding fraud.** A posted `FPV_i(Q)`, or a binding used to support it, that does not match the figure recomputed from public settlement and registry events.
+- **Wash trading and self-dealing.** The off-chain judgment FIP-0118 assigns to SRA Governance: distinguishing genuine client demand from circular payments between colluding parties. `TODO(owners):` any indicative numeric thresholds used only as review triggers. This repository sets none, and a threshold would not be an automatic finding.
+
+The evidence for a relationship is the list in [§4.4.2](#442-dispute-resolution-for-contested-bindings). `TODO(owners):` any stricter minimum per outcome.
 
 ### 4.4.4 What triggers a verification
 
-- A public-data anomaly surfaced by the quarterly FPV recomputation or by monitoring (volume spikes at quarter/gate boundaries, figures that clear the target by a hair, volume with no matching storage activity).
+- A public-data anomaly surfaced by the quarterly FPV recomputation or by monitoring (volume spikes at quarter or gate boundaries, figures that clear the target by a hair, volume with no matching storage activity). These phrases are review triggers, not automatic findings, and they have no numeric cutoff in this repository. `TODO(owners):` indicative thresholds, if the Safes want them published as triggers only.
 - A community report filed as an issue in this repository.
 - A contested binding escalated from the dispute process.
+- A "correction blocked" note under [§2.3.4](02-solstice-program-governance.md#234--quarterly-fpv-verification--correction-correctvolume).
 
 ### 4.4.5 Escalation
 
 1. **Trigger** → run the relevant on-chain checks (see [§3.2](03-orchestrator-operational-guidelines.md#32-orchestrators-tasks-and-actions)); the recomputation is deterministic and public.
 2. **Request evidence** if an anomaly holds: open a public issue and request on- and off-chain evidence; the orchestrator answers within the response window (7 days).
-3. **Decide:** reassign a binding, or `Remove(orch)`.
+3. **Decide:** reassign a binding under [§2.3.11](02-solstice-program-governance.md#2311--reassign-a-binding-reassignbinding), or `RemoveOrchestrator`. Record the written reason.
 4. Registry changes bind at once and are recorded in the Change Log (see [§2.3](02-solstice-program-governance.md#23-sra-governance-tier--tasks-and-actions)) and are recorded, with rationale, in the issue.
 
 ### 4.4.6 Cross-cutting verification measures
 
 - **Reproducibility:** every verification conclusion must be reproducible from public data via the versioned reference indexer; findings cite the events and blocks used.
-- **Sanctions cadence:** re-screen registered addresses on a fixed cadence and at each admission, not only on trigger.
-- **Conflict attestations:** collect a conflict-of-interest / no-common-control attestation at admission and on any roster or binding change.
+- **Sanctions cadence:** re-screen registered addresses on a fixed cadence and at each admission, not only on trigger. `TODO(owners):` which lists, who screens, and the cadence. This repository does not name them.
+- **Conflict attestations:** collect a conflict-of-interest / no-common-control attestation from the Orchestrator at admission and on any binding change, and the Safe-organization affiliation disclosure in [§2.1.1](02-solstice-program-governance.md#211-standards-for-a-governance-safe-both-tiers). The FIP's separation rule remains address-level. Recusal inside a Safe is the `TODO(owners)` in that section.
+- **Recovery contact:** the declaration names a recovery contact distinct from the identity key ([Policy 6](03-orchestrator-operational-guidelines.md#31-policies)). `TODO(owners):` any consequence for a contact that stays unreachable, and any out-of-band identity check. `ReplaceWallet` still requires the public request in [§2.3.3](02-solstice-program-governance.md#233--replace--rotate-an-orchestrator-address-replacewallet).
 - **Verification trail:** triggers, evidence, decisions, and on-chain actions are all logged in this repository.
 
 ---

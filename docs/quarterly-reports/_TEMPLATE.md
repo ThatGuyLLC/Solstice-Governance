@@ -89,7 +89,7 @@ Printed here because `MIN_LOT(Q)` is derived off-chain and is stored neither on-
 
 ### 2.7 Pipeline and sales commentary
 
-Standard public-company style disclosure.
+`TODO(owners):` what "standard public-company style disclosure" requires. This template does not define it.
 
 | Field | Value |
 | :-- | :-- |

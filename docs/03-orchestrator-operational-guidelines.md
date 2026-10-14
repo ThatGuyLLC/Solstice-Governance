@@ -1,6 +1,6 @@
 # 3. Orchestrator Operational Guidelines
 
-> Part of the [Solstice Governance Repository](../README.md). Protocol rules are fixed by [**FIP-0118**](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md) and referenced throughout.
+> Part of the [Solstice Governance Repository](../README.md). Protocol rules are fixed by [**FIP-0118**](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md) and referenced throughout. Quotations of FIP-0118 are copied from the commit pinned in the [README](../README.md).
 
 This section consolidates what is expected of Orchestrators: the operational guidelines, policies, tasks, and monitoring tools. Declaration, verification and escalation now lives in [§4.4](04-quarterly-review-and-runbook.md#44-declaration-verification-and-escalation).
 
@@ -33,20 +33,22 @@ Each policy notes where it is enforced:
 | 1 | The program is open to any entity that routes paid storage service revenue through admitted settlement rails on behalf of clients. Admission is discretionary in Phase 1; a future FIP makes admission permissionless in Phase 2. | Repository |
 | 2 | Qualifying volume is settlement through admitted Filecoin Pay contracts, in admitted stablecoins or FIL converted off-chain via the reference indexer using public fee-auction prints (`MIN_LOT`, `PRICE_BAND`), attributable to the orchestrator's registered (payer, operator) pairs. Nothing else counts. | Contract |
 | 3 | A (payer, operator) pair binds to exactly one orchestrator. Registering a pair already bound elsewhere reverts. Clients are free to work with multiple orchestrators across different operator relationships; the pair, not the client, is the unit of attribution. | FIP |
-| 4 | Volume counts only for pairs registered before the settlement occurs. Retroactive attribution is not accepted. | Repository |
+| 4 | A registration applies from its execution epoch and also covers the pair's unbound past inside the same quarter, back to the later of the quarter's first epoch and the epoch the pair last became unbound (back-cover). A registration in `[Start(Q+1) - REGISTRATION_CUTOFF, Start(Q+1))` applies from `Start(Q+1)` and covers nothing of quarter Q. `REGISTRATION_CUTOFF` is a governance parameter (initial mainnet value 20,160 epochs). A change to it applies from the first epoch of the next quarter. | FIP |
 | 5 | Each quarter, orchestrators post FPV within `POST_PERIOD` when it is above zero. `PostVolume` rejects zero (a zero total is equivalent to not posting); zero is not posted and binds at zero. A value neither posted nor corrected during `VERIFICATION_WINDOW` likewise binds at zero. Bound values are final; a successful appeal affects later quarters only. | FIP and contract |
-| 6 | Within 7 days of admission, each orchestrator publishes its declaration file in this repository: a short description of its service, contact information, and its registered pairs, including any pointer to service-contract metadata. | Repository |
-| 7 | An orchestrator with no settled volume for **[TBD timeline]** consecutive quarters enters registry review and may be removed. Removal on inactivity is registry hygiene: an idle registration adds attack surface without adding measurement value. | Repository |
-| 8 | No registry address participates in either governance tier, as a Safe or as a key holder within one. | FIP |
-| 9 | Quarterly Community Report on claims and reward reception, failure to disclose is a removal trigger and forfeits the next quarter re-admission | FIP and Repository |
+| 6 | Each Orchestrator publishes its declaration in this repository: a short description of its service, contact information, a recovery contact, its registered pairs, and any pointer to service-contract metadata. An Orchestrator admitted by `AddOrchestrator` publishes it within 7 days of admission. The Orchestrator seated at activation publishes it on activation (FIP-0118 §4.2), not on that 7-day clock. | Repository, and FIP for the activation disclosure |
+| 7 | An orchestrator with no settled volume for a number of consecutive quarters enters registry review and may be removed. Removal on inactivity is registry hygiene: an idle registration adds attack surface without adding measurement value. `TODO(owners):` the number of consecutive quarters. This repository does not set it. | Repository |
+| 8 | No registry address participates in either governance tier, as a governance multisig or as a key holder within one. | FIP |
+| 9 | Quarterly Community Report on claims and reward reception. Failure to file is a removal trigger and forfeits re-admission for the following quarter (FIP-0118 §4.2). A later return is a fresh `AddOrchestrator` and a fresh application, and it is not available in the forfeited quarter. | FIP |
 
-Policies 3, 5, and 8 restate FIP-0118 invariants verbatim:
+Policies 5 and 8 restate FIP-0118 text. Policy 3 restates the uniqueness sentence. Policy 4 restates the application rules in FIP-0118 §2.2; it is not a repository rule.
 
-> "Each (payer, operator) pair is bound to at most one orchestrator, so a registration that duplicates an existing binding reverts."
+> "Indeed, the SRA enforces that each (payer, operator) pair is bound to at most one Orchestrator, so a registration that duplicates an existing binding reverts."
 >
 > "Binding: whatever each value is when the window closes binds, and bound values are final for the quarter." … "A value neither posted nor supplied binds as 0, so a non-poster cannot block the quarter."
 >
-> "No address in the registry may participate in either contract governance tier, as a Safe or as a key holder within one: a party that set weights could raise its own share, and one that ran the registry could admit itself or block competitors."
+> "No address in the registry may participate in either contract governance tier, as a governance multisig or as a key holder within one: a party that set weights could raise its own share, and one that ran the registry could admit itself or block competitors."
+
+Entity-level affiliation is a repository disclosure in [§2.1.1](02-solstice-program-governance.md#211-standards-for-a-governance-safe-both-tiers). It does not change Policy 8.
 
 ## 3.2 Orchestrators Tasks and Actions
 
@@ -76,7 +78,7 @@ Each Orchestrator has **two** on-chain addresses in the SRA registry (`AddOrches
 
 They can differ. As part of admission (see [§2.3 SRA Governance Tier](02-solstice-program-governance.md#23-sra-governance-tier--tasks-and-actions)), record both addresses in your GitHub declaration. Your entry appears in the [Orchestrator Registry](02-solstice-program-governance.md#2312-orchestrator-registry-admitted-orchestrators) with both columns.
 
-Rotate a compromised **payout** wallet via `ReplaceWallet(old, new)`. Per FIP-0118 §3.2, that call swaps the payout wallet through an immediate `ReplaceAddress`, so f02 pays the new wallet at once.
+Rotate a compromised **payout** wallet by filing the public request in [§2.3.3](02-solstice-program-governance.md#233--replace--rotate-an-orchestrator-address-replacewallet). SRA Governance then calls `ReplaceWallet(old, new)`. Per FIP-0118 §3.2, that call runs only on a public request from the Orchestrator recorded in this repository, and it swaps the payout wallet through an immediate `ReplaceAddress`, so f02 pays the new wallet at once. The Orchestrator does not send the governance call. If the identity key is lost, the request cannot be filed and `ReplaceWallet` does not run.
 
 </details>
 
@@ -84,16 +86,16 @@ Rotate a compromised **payout** wallet via `ReplaceWallet(old, new)`. Per FIP-01
 <details>
 <summary><strong>3.2.3 — Linking deals to Filecoin Pay services</strong></summary>
 
-> **Cadence:** per deal, before settlement · **On-chain call:** `RegisterPairs`
+> **Cadence:** per deal · **On-chain call:** `RegisterPairs`
 
-Volume counts only when it settles on an admitted Filecoin Pay contract, in an admitted stablecoin or FIL, on a rail whose (payer, operator) pair is registered to you *before* the settlement occurs. To link a deal:
+Volume counts when it settles on an admitted Filecoin Pay contract, in an admitted stablecoin or FIL, on a (payer, operator) pair bound to you under the FIP application rules ([Policy 4](#31-policies)). A registration applies from its execution epoch and covers the pair's unbound past inside the same quarter (back-cover). A registration in `[Start(Q+1) - REGISTRATION_CUTOFF, Start(Q+1))` applies from `Start(Q+1)` and covers nothing of quarter Q. Admitted lists and pricing parameters in force are those that apply to the quarter, not a list changed mid-quarter ([§2.3.7](02-solstice-program-governance.md#237--maintain-admitted-lists--fee-auction-parameters-setadmittedlists-pricing-settings)). To link a deal:
 
-1. Set up the client's payment on an admitted Filecoin Pay contract (admitted-contract list).
+1. Set up the client's payment on an admitted Filecoin Pay contract (the latest `SetAdmittedLists` event that applies to the quarter).
 2. Create the rail with the operator you will register.
-3. Register the (payer, operator) pair via `RegisterPairs` before the first settlement. Retroactive attribution is not accepted; a pair already bound elsewhere reverts (uniqueness invariant).
-4. The client settles on-rail (`RailSettled` or one-time payments); those settlements accrue to your FPV.
+3. Register the (payer, operator) pair via `RegisterPairs`. A pair already bound elsewhere reverts (uniqueness invariant). Registering promptly still matters: back-cover does not cross a previous binding, a removal's release epoch, or the cutoff into the previous quarter.
+4. The client settles on-rail (`RailSettled` or one-time payments); those settlements accrue to your FPV when the binding covers their epoch.
 
-> **Note:** volume on unregistered pairs, off admitted rails, or in non-admitted assets will not be accounted for in the FPV measurement.
+> **Note:** volume off admitted rails, or in non-admitted assets, is not counted. Back-cover does not reach it.
 
 </details>
 
@@ -121,7 +123,7 @@ Rewards land in your payout wallet each epoch; deploying them against your manda
 
 - **Custody:** hold reserves in a multisig (e.g., Safe) with hardware-key signers; never keep the treasury on a single hot key.
 - **Segregation:** keep a cold reserve (offline/hardware, high signing threshold) separate from a small hot operating wallet; sweep excess from hot to cold.
-- **Key hygiene:** never expose or share private keys or seed phrases, and never place them in code, configs, or shared documents; if exposure is even suspected, rotate immediately (`Replace`).
+- **Key hygiene:** never expose or share private keys or seed phrases, and never place them in code, configs, or shared documents; if exposure of the payout wallet is even suspected, file a `ReplaceWallet` request immediately (§3.2.2).
 - **Least privilege:** where you use exchanges or custodial APIs, prefer read-only keys and disable withdrawal/trading scopes you don't need.
 - **Monitoring & recovery:** alert on inflows/outflows, name an accountable key-custody owner, and keep a documented, tested recovery path.
 - **Conversion discipline:** convert only what runway requires; hold the reserve.
@@ -140,9 +142,9 @@ Rewards land in your payout wallet each epoch; deploying them against your manda
 
 FIP-0118 fixes the posting period and the no-clawback rule:
 
-> "Posting: each Orchestrator posts FPV_i(Q) to the SRA during the posting period (E, E + POST_PERIOD]."
+> "Posting: each Orchestrator posts `FPV_i(Q)` to the SRA during the posting period [`Start(Q+1)`, `Start(Q+1)` + `POST_PERIOD`) (`Start` as defined above)."
 >
-> "There is no retroactive clawback: a misreport discovered after binding is grounds for audit or removal."
+> "There is no retroactive clawback: a misreport discovered after binding is grounds for audit or removal (Section 4)."
 
 </details>
 
@@ -151,7 +153,20 @@ FIP-0118 fixes the posting period and the no-clawback rule:
 
 > **Cadence:** as triggered · **On-chain call:** none (governance-side `CorrectVolume` / `ReassignBinding`)
 
-Declarations are accepted by default; verification is exception-based and dispute-driven, never pre-clearance. If a binding is contested or a figure disputed, the process runs through the dispute resolution process in [§4.4.2](04-quarterly-review-and-runbook.md#442-dispute-resolution-for-contested-bindings). Appeals of a `CorrectVolume` follow the same evidence process and can affect only later quarters, since bound values are final.
+Declarations of client relationships are accepted by default. SRA Governance still recomputes every posted figure each quarter ([§2.3.4](02-solstice-program-governance.md#234--quarterly-fpv-verification--correction-correctvolume)); that duty is not dispute-driven. An audit of a business relationship is exception-based ([§4.4](04-quarterly-review-and-runbook.md#44-declaration-verification-and-escalation)). If a binding is contested or a figure disputed, the process runs through [§4.4.2](04-quarterly-review-and-runbook.md#442-dispute-resolution-for-contested-bindings). A contested binding that should move uses `ReassignBinding` ([§2.3.11](02-solstice-program-governance.md#2311--reassign-a-binding-reassignbinding)). Appeals of a `CorrectVolume` follow the same evidence process and can affect only later quarters, since bound values are final.
+
+</details>
+
+<details>
+<summary><strong>3.2.8 — Release a binding (CancelBinding)</strong></summary>
+
+> **Cadence:** when a client relationship ends, or a client moves to another Orchestrator · **On-chain call:** `CancelBinding(pair)`, by the bound Orchestrator, for itself
+
+`CancelBinding` is not a governance call. It releases a pair the caller holds. The release applies at the execution epoch. The Orchestrator keeps the span it served. Any admitted Orchestrator may register the pair again, and that registration's back-cover reaches no further back than the release (FIP-0118 §2.2 and §3.2).
+
+Use it for a cooperative exit: a client relationship that ended, or a client moving to another Orchestrator (FIP-0118 §3.2). The contract does not know whether a dispute is open. A contested binding is resolved by SRA Governance with `ReassignBinding` or removal ([§2.3.11](02-solstice-program-governance.md#2311--reassign-a-binding-reassignbinding) and [§2.3.2](02-solstice-program-governance.md#232--remove-an-orchestrator-removeorchestrator)).
+
+The call reverts unless the caller holds the binding. State the chain id in any issue that records the release. Mainnet and calibnet can show the same contract address (§2.4.1 of the governance page).
 
 </details>
 
@@ -161,10 +176,10 @@ Declarations are accepted by default; verification is exception-based and disput
 
 These tools are meant to ease the monitoring of the program's activity. Orchestrators use them to check their recomputed FPV against what they posted; SRA Governance and any community observer runs the same tools for oversight. Every verification action and its conclusion must be reproducible from these public sources.
 
-- Versioned reference indexer: *(links to be added)*
-- Governance & signing interface: *(links to be added)*
+- Versioned reference indexer: not yet published. Until it is, the normative algorithm is FIP-0118 §2.2 at the commit pinned in the [README](../README.md). `TODO(owners):` name an owner and a backup maintainer, and decide whether a pinned indexer and calibnet test vectors are required before activation.
+- Governance & signing interface: *(links to be added)* `TODO(owners):` the interface, pinned per chain id.
 - Settlement data and dashboards: *(links to be added)*
-- Registry state, admitted-stablecoin whitelist, and admitted orchestrators: see the [Orchestrator Registry](02-solstice-program-governance.md#2312-orchestrator-registry-admitted-orchestrators) *(on-chain links to be added)*
+- Registry state and admitted orchestrators: see the [Orchestrator Registry](02-solstice-program-governance.md#2312-orchestrator-registry-admitted-orchestrators). The admitted-stablecoin whitelist and the admitted Filecoin Pay addresses are the latest `SetAdmittedLists` event that applies to the quarter, not the registry table. *(on-chain links to be added)*
 - Filecoin Pay contracts: *(links to be added)*
 
 ## 3.4 Solstice Orchestrator Task Checklist
@@ -179,9 +194,10 @@ Use this checklist to track completion of the core Solstice Orchestrator respons
 | Solstice Governance Repository      | [View Repository](https://github.com/filecoin-project/Solstice-Governance)                                                          |
 
 ---
-<summary><strong>3.4.1 — Every New Client / Deal </strong></summary>
 
-Complete before counting FPV from a new payer/operator relationship.
+### 3.4.1 — Every New Client / Deal
+
+Complete when taking on a new payer/operator relationship. Counting follows [Policy 4](#31-policies), not a rule that volume before registration is lost.
 
 | Done | Task                                                       | Timing                         | Reference                                                                                                                                    |
 | ---- | ---------------------------------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -193,15 +209,16 @@ Complete before counting FPV from a new payer/operator relationship.
 | [ ]  | Confirm payment asset is admitted                          | Before settlement              | [Current Parameters](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/02-solstice-program-governance.md#24-parameters) |
 | [ ]  | Establish payment rail between payer and operator          | Before settlement              | [Guidelines](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)               |
 | [ ]  | Check whether payer/operator pair is already registered    | Before registration            | [Governance](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/02-solstice-program-governance.md)                       |
-| [ ]  | Register payer/operator pair using `RegisterPairs`         | **Before settlement**          | [Pair Registration Rules](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)  |
+| [ ]  | Register payer/operator pair using `RegisterPairs`         | When the client relationship starts. Back-cover counts the pair's unbound on-rail past inside the quarter. A registration inside `REGISTRATION_CUTOFF` of the next quarter covers nothing of the quarter that is ending. | [Pair Registration Rules](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)  |
 | [ ]  | Confirm registration succeeded on-chain                    | Immediately after registration | [Guidelines](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)               |
 | [ ]  | Confirm payments are settling through the registered rail  | After setup                    | [Settlement Rules](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)         |
 | [ ]  | Retain evidence supporting the client relationship         | Ongoing                        | [Verification Runbook](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/04-quarterly-review-and-runbook.md)            |
 
-> **Important:** Volume settled before the payer/operator pair is registered cannot be attributed retroactively.
+> **Important:** Back-cover attributes the pair's unbound on-rail past inside the quarter. It does not cross an earlier binding, a release epoch, the `REGISTRATION_CUTOFF` into the previous quarter, or volume that never settled on an admitted rail.
 
 ---
-<summary><strong>3.4.2 — Treasury & Wallet Management </strong></summary>
+
+### 3.4.2 — Treasury & Wallet Management
 
 | Done | Task                                                                     | Cadence      | Reference                                                                                                                           |
 | ---- | ------------------------------------------------------------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
@@ -217,14 +234,15 @@ Complete before counting FPV from a new payer/operator relationship.
 | [ ]  | Rotate exposed credentials immediately                                   | As needed    | [Wallet Guidance](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md) |
 
 ---
-<summary><strong>3.4.3 — Quarter-End FPV Calculation </strong></summary>
+
+### 3.4.3 — Quarter-End FPV Calculation
 
 | Done | Task                                                        | Timing              | Reference                                                                                                                                    |
 | ---- | ----------------------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | [ ]  | Confirm the reporting quarter has ended                     | Quarter close       | [Timing Parameters](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/02-solstice-program-governance.md#24-parameters)  |
 | [ ]  | Identify active registered payer/operator pairs             | Quarter close       | [Guidelines](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)               |
 | [ ]  | Retrieve settlement activity for those pairs                | Quarter close       | [Guidelines](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)               |
-| [ ]  | Exclude settlements occurring before pair registration      | Quarter close       | [Measurement Rules](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)        |
+| [ ]  | Apply the FIP application rules (back-cover, `REGISTRATION_CUTOFF`, releases, and `inherit`) | Quarter close       | [Measurement Rules](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)        |
 | [ ]  | Exclude settlements using non-admitted contracts            | Quarter close       | [Measurement Rules](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)        |
 | [ ]  | Exclude settlements using non-admitted assets               | Quarter close       | [Current Parameters](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/02-solstice-program-governance.md#24-parameters) |
 | [ ]  | Confirm remaining volume represents genuine client payments | Quarter close       | [Guidelines](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)               |
@@ -236,7 +254,8 @@ Complete before counting FPV from a new payer/operator relationship.
 | [ ]  | Finalize quarterly FPV                                      | Before `PostVolume` | [Measurement Rules](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/03-orchestrator-operational-guidelines.md)        |
 
 ---
-<summary><strong>3.4.4 — Post Quarterly FPV </strong></summary>
+
+### 3.4.4 — Post Quarterly FPV
 
 | Done | Task                                      | Timing                    | Reference                                                                                                                                   |
 | ---- | ----------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -248,7 +267,8 @@ Complete before counting FPV from a new payer/operator relationship.
 | [ ]  | Save posting transaction reference        | Immediately after posting | —                                                                                                                                           |
 
 ---
-<summary><strong>3.4.5 — Verification Window </strong></summary>
+
+### 3.4.5 — Verification Window
 
 | Done | Task                                                     | Timing               | Reference                                                                                                                                   |
 | ---- | -------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -265,7 +285,8 @@ Complete before counting FPV from a new payer/operator relationship.
 | [ ]  | Confirm final FPV                                        | Before window closes | [Verification Runbook](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/04-quarterly-review-and-runbook.md)           |
 
 ---
-<summary><strong>3.4.6 — Quarterly Community Report </strong></summary>
+
+### 3.4.6 — Quarterly Community Report
 
 | Done | Task                                             | Timing                   | Reference                                                                                                                      |
 | ---- | ------------------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -284,7 +305,8 @@ Complete before counting FPV from a new payer/operator relationship.
 | [ ]  | Respond to questions or challenges               | Required response window | [Reporting Runbook](https://github.com/filecoin-project/Solstice-Governance/blob/main/docs/04-quarterly-review-and-runbook.md) |
 
 ---
-<summary><strong>3.4.7 — Quarter Closeout </strong></summary>
+
+### 3.4.7 — Quarter Closeout
 
 | Done | Task                                                       |
 | ---- | ---------------------------------------------------------- |
@@ -298,9 +320,10 @@ Complete before counting FPV from a new payer/operator relationship.
 | [ ]  | Archive relevant governance correspondence                 |
 | [ ]  | Confirm quarterly report is publicly available             |
 | [ ]  | Confirm no unresolved governance requests remain           |
+| [ ]  | Release ended client pairs with `CancelBinding`            |
 | [ ]  | Carry unresolved operational actions into the next quarter |
 
-<summary><strong>3.4.8 — Operational Tooling Still Pending </strong></summary>
+### 3.4.8 — Operational Tooling Still Pending
 
 | Tool / Resource                       | Status  |
 | ------------------------------------- | ------- |
@@ -309,7 +332,7 @@ Complete before counting FPV from a new payer/operator relationship.
 | Governance and signing interface      | **TBD** |
 | Direct on-chain registry interface    | **TBD** |
 | Filecoin Pay contract reference links | **TBD** |
-| Final admitted stablecoin whitelist   | **TBD** |.
+| Final admitted stablecoin whitelist   | **TBD** — the authoritative record is the latest `SetAdmittedLists` event, applied from the next quarter |
 ---
 
 ← Previous: [2. Solstice Program Governance](02-solstice-program-governance.md) · [Back to README](../README.md) · Next: [4. Quarterly Review and Runbook](04-quarterly-review-and-runbook.md) →

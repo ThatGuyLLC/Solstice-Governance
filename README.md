@@ -22,7 +22,7 @@ Each section below is a separate page, ordered by its number, so a reader intere
 - Measurement-rule declarations for each orchestrator.
 - The registry of admitted Orchestrators and the change log of program-rule updates.
 - The dispute procedure for contested bindings, and the verification playbook.
-- The versioned reference indexer that recomputes FPV from public settlement events.
+- The versioned reference indexer that recomputes FPV from public settlement events. FIP-0118 §2.2 says a versioned reference implementation is maintained here, and that the FIP text is the normative algorithm. The indexer is not published yet (see §1.4).
 - Pointers to the FIP-fixed durations of `POST_PERIOD`, `VERIFICATION_WINDOW`, and `EPOCHS_PER_QUARTER` (not edited here; changed only by an SRA code upgrade).
 - [The contract upgrade runbook](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md) in the [solstice](https://github.com/filecoin-project/solstice) repository. Upgrades are driven by engineers at the request of governance (an accepted FIP, approved by both tiers' Safes), and the runbook stays next to the scripts and workflows it depends on so they are reviewed together.
 - The wallet addresses for each tier's Safes.
@@ -30,18 +30,21 @@ Each section below is a separate page, ordered by its number, so a reader intere
 
 ## 1.3 Changing this repository
 
-Changes happen by pull request with public review — covering, but not limited to, merge rights, review windows, and whether any section requires sign-off from both tiers. Every change to the program rules is recorded in the [Program Change Log](docs/06-changelog.md), which links the originating community issue and, where applicable, the resulting FIP.
+Changes happen by pull request with public review. Every change to the program rules is recorded in the [Program Change Log](docs/06-changelog.md), which links the originating community issue and, where applicable, the resulting FIP.
+
+`TODO(owners):` who may merge, who the maintainers are, the review window for normative sections (the procedures in docs 02–04 and the policies), whether those sections need sign-off from both tiers, and whether commits must be signed. This repository does not set those rules.
 
 ## 1.4 Reference Links
 
-- FIP text: [FIP-0118](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md)
-- Contract upgrade runbook: [solstice `docs/UPGRADE.md`](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md)
-- Reference indexer: TBD
-- Settlement data and dashboards: TBD
+- FIP text (latest): [FIP-0118](https://github.com/filecoin-project/FIPs/blob/master/FIPS/fip-0118.md)
+- FIP text pinned for quotations in this repository: [FIP-0118 at `23b42964890590a49c9cbc6e19a7e9e361d1f8a0`](https://github.com/filecoin-project/FIPs/blob/23b42964890590a49c9cbc6e19a7e9e361d1f8a0/FIPS/fip-0118.md). A quotation is updated in the same pull request that follows a change in that text.
+- Contract upgrade runbook: [solstice `docs/UPGRADE.md`](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md). An upgrade issue pins this file by commit and records the implementation bytecode hash named in the accepted FIP.
+- Reference indexer: TBD. `TODO(owners):` an owner, a backup maintainer, and whether publication is required before activation.
+- Settlement data and dashboards: TBD. `TODO(owners):` the same publication decision.
 
 ## 1.5 Repository Maintainers
 
-Maintainers keep this repository current and administer pull requests. Authority over the Solstice program rests with two governance tiers (the SWA and SRA Safes) as fixed by FIP-0118.
+Maintainers keep this repository current and administer pull requests. Who they are is not stated. `TODO(owners):` name them. Authority over the Solstice program rests with two governance tiers (the SWA and SRA Safes) as fixed by FIP-0118.
 
 ---
 

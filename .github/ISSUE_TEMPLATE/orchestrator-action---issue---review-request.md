@@ -10,7 +10,8 @@ assignees: ''
 ### YYYY-MM-DD — <short title>
 
 - **Type:** Orchestrator action
-- **Action:** Quarterly Community Report | Payout wallet replacement request | Binding registration (RegisterPairs) | Volume posting (PostVolume) | Response to a verification request | Other
+- **Chain id:** 314 (mainnet) | 314159 (calibnet)
+- **Action:** Quarterly Community Report | Payout wallet replacement request | Binding registration (RegisterPairs) | Release a binding (CancelBinding) | Volume posting (PostVolume) | Response to a verification request | Other
 - **Orchestrator:** <name + registry entry link>
 - **Summary:** <what is being filed or requested>
 
