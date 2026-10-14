@@ -94,7 +94,7 @@ SWA Governance approves nothing routine: the w1 ramp and the volume gate are mec
 > 2. Pre-submission check: verify the schedule envelope (Σw ≤ 1 across the whole segment) and that the write matches the accepted FIP.
 > 3. Both SWA Safes approve `ProposeWrite(write)`. The first Safe’s transaction only records its approval (`UnanimousGovernance`); the action body runs in the second Safe’s transaction. The second Safe signs only if a dry-run simulation of **its own** approval succeeds, and notes the simulation result on the task-register issue. On a simulated revert, either Safe `veto`s and the action is resubmitted (a failed second approval leaves the task half-approved and burns the signature round).
 > 4. The SWA relays to f02; f02 queues it with an `effective_epoch` and holds it for `SWA_TIMELOCK` (7 days).
-> 5. Objection window: the queued write is public. Monitor objections filed under [§2.2.8](#228--objection-during-an-swa-hold). Either SWA Safe may `cancelPending` / `cancelPendingWeight` / `veto(taskId)` (as applies) on a mismatch with the accepted FIP, a missing FIP, or new information that surfaced after acceptance. Absent a cancellation it binds at `effective_epoch`. A veto or a cancellation is recorded on the task-register issue with a written reason. The contract does not require the reason; this repository does.
+> 5. Objection window: the queued write is public. Monitor objections filed under [§2.2.8](#228--objection-during-an-swa-hold). Either SWA Safe may `cancelPending` / `cancelPendingWeight` / `veto(taskId)` (as applies) on a mismatch with the accepted FIP, a missing FIP, or new information that surfaced after acceptance. Absent a cancellation it binds at `effective_epoch`. `TODO(owners): confirm` that a veto or a cancellation is recorded on the task-register issue with a written reason. The contract does not require the reason.
 > 6. Record the outcome in this repository and in the [Program Change Log](06-changelog.md).
 
 The L1 envelope check restates a FIP invariant:
@@ -155,7 +155,7 @@ Standard flow; the call is `SetDistribution(id, distribution)`. Can be used, for
 
 > **Requires:** both SWA Safes + accepted FIP · **Hold:** SWA-internal timelock, 7 days · **Enforced by:** SWA · **Cancel:** either SWA Safe
 
-Same flow as 2.2.5; the FIP carries the upgrade. It executes through the pre-upgrade code, so the hold and checks still bind. The upgrade issue pins the [solstice upgrade runbook](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md) by commit and records the implementation bytecode hash named in the accepted FIP. Both Safes check that hash before approval. This repository does not govern edits to that runbook except by the pin in the issue.
+Same flow as 2.2.5; the FIP carries the upgrade. It executes through the pre-upgrade code, so the hold and checks still bind. The upgrade issue pins the [solstice upgrade runbook](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md) by commit. FIP-0118 §4.2 requires that the pending upgrade and its execution be observable on chain. `TODO(owners): confirm` whether the issue must also record an implementation bytecode hash. This repository does not govern edits to that runbook except by the pin in the issue.
 
 </details>
 
@@ -170,7 +170,7 @@ Either Safe can stop a bad SWA change on the matching path:
 2. `cancelPendingWeight(op)` — queued weight write on f02.
 3. `veto(taskId)` — a task still inside the SWA (half-approved, or in the SWA-internal hold).
 
-A cancellation only preserves the status quo. Mechanism writes (the gate step via `StepWeightRecords`) cannot be cancelled: `CancelPending` refuses that operation (FIP-0118 §2.4.7 and §4.3). Record the cancellation, and the reason, on the task-register issue.
+A cancellation only preserves the status quo. Mechanism writes (the gate step via `StepWeightRecords`) cannot be cancelled: `CancelPending` refuses that operation (FIP-0118 §2.4.7 and §4.3). Record the cancellation on the task-register issue. `TODO(owners): confirm` whether that record includes a written reason.
 
 </details>
 
@@ -179,9 +179,9 @@ A cancellation only preserves the status quo. Mechanism writes (the gate step vi
 
 The objection channel is an issue in this repository, using the community issue template, with nature "Objection to a pending SWA write". It is open to anyone during the hold.
 
-The issue states the chain id, the queued write (`taskId` or the f02 operation), the accepted FIP (link and commit), and which of the FIP's cancel grounds is claimed: the queued write does not match the accepted FIP, the FIP is missing, or new information surfaced after acceptance (FIP-0118 §4.3). An objection that does not state one of those grounds is not a sustained objection.
+The issue states the chain id, the queued write (`taskId` or the f02 operation), the accepted FIP (link and commit), and which of the FIP's cancel grounds is claimed: the queued write does not match the accepted FIP, the FIP is missing, or new information surfaced after acceptance (FIP-0118 §4.3). `TODO(owners): confirm` that an objection outside those grounds is not a sustained objection.
 
-A **sustained objection** is an objection that states one of those grounds, is filed here during the hold, and is not withdrawn. It does not itself cancel the write. Either SWA Safe may cancel. Whether to cancel is that Safe's decision. A cancellation, and a decision not to cancel, is recorded on the issue with a written reason.
+A **sustained objection** is an objection that states one of those grounds, is filed here during the hold, and is not withdrawn. It does not itself cancel the write. Either SWA Safe may cancel. Whether to cancel is that Safe's decision. `TODO(owners): confirm` that a cancellation, and a decision not to cancel, is recorded on the issue with a written reason.
 
 The response-time commitment is 7 days, published in this section and in [§2.4.2](#242-governed-parameters). It is how quickly a Safe acts on an objection during the hold. It does not extend `SWA_TIMELOCK`.
 
@@ -225,7 +225,7 @@ Registry changes need both Registry Safes but need no per-change FIP (the one ex
 > **Standard registry-change flow** (referenced by 2.3.1–2.3.5 and by the Safe replacement in 2.5.3):
 >
 > 1. Trigger and diligence (application, dispute outcome, audit finding, rotation request, or list update).
-> 2. Both Registry Safes approve the relevant call. The first Safe’s transaction only records its approval (`UnanimousGovernance`); the action body runs in the second Safe’s transaction (SRA header: the second Safe MUST dry-run the calldata before approving). The second Safe signs only if a dry-run simulation of **its own** approval succeeds, and notes the simulation result on the task-register issue. On a simulated revert (wrong wallet, closed window, pending shares, etc.), either Safe `veto`s and the action is resubmitted. A veto is recorded on the issue with a written reason. The contract does not require the reason; this repository does.
+> 2. Both Registry Safes approve the relevant call. The first Safe’s transaction only records its approval (`UnanimousGovernance`); the action body runs in the second Safe’s transaction (SRA header: the second Safe MUST dry-run the calldata before approving). The second Safe signs only if a dry-run simulation of **its own** approval succeeds, and notes the simulation result on the task-register issue. On a simulated revert (wrong wallet, closed window, pending shares, etc.), either Safe `veto`s and the action is resubmitted. `TODO(owners): confirm` that a veto is recorded on the issue with a written reason. The contract does not require the reason.
 > 3. The change binds when the second SRA Safe approves (no pending queue, no cancellation path). Record it in the Change Log.
 > 4. Both Registry Safes can see the submitted task. The `Submitted` event carries the `taskId`, not the full content; the issue carries the content.
 > 5. Record the outcome in the issue/repository, and update the [Orchestrator Registry](#2312-orchestrator-registry-admitted-orchestrators) where the change affects an Orchestrator's status.
@@ -236,7 +236,7 @@ The recomputation is deterministic: any observer running the reference indexer o
 
 An Orchestrator's application is filed as an issue in this repository. If application is approved, SRA Governance executes the admit on-chain (action 2.3.1). **Every admitted Orchestrator is recorded in the [Orchestrator Registry (2.3.12)](#2312-orchestrator-registry-admitted-orchestrators).**
 
-Phase 1 admission is discretionary (FIP-0118 §4.3). The admission rubric is not set. A denial is recorded on the application issue with a written rationale. `TODO(owners):` publish the rubric before the first application is decided, including any decision deadline and whether a denial can be appealed. This repository does not invent the criteria.
+Phase 1 admission is discretionary (FIP-0118 §4.3). The admission rubric is not set. `TODO(owners): confirm` that a denial is recorded on the application issue with a written rationale. `TODO(owners):` publish the rubric before the first application is decided, including any decision deadline and whether a denial can be appealed. This repository does not invent the criteria.
 
 A uniqueness rule is fixed by the FIP:
 
@@ -279,7 +279,7 @@ A later return, where one is allowed, is a fresh `AddOrchestrator` with a fresh 
 
 `ReplaceWallet` is available only on a public request from the Orchestrator recorded in this repository (FIP-0118 §3.2). No approval without that request. A replacement with no matching request is the capture the FIP calls hostile on sight.
 
-1. The Orchestrator files an issue identifying `orch`, the new payout wallet, and the chain id. `TODO(owners):` whether that request must also carry a signature by `orch`, and which scheme. Until that is set, the Safes do not approve a request the Orchestrator has not confirmed from its published contact.
+1. The Orchestrator files an issue identifying `orch`, the new payout wallet, and the chain id. `TODO(owners):` whether that request must also carry a signature by `orch`, and which scheme. `TODO(owners): confirm` whether, until that is set, the Safes withhold approval unless the Orchestrator has confirmed the request from its published contact.
 2. Resolve the new wallet to an actor ID. It must exist and must not be a payment channel (same check as §2.3.1). Record the actor code on the issue.
 3. Both Registry Safes approve `ReplaceWallet(old, new)` on the issue's canonical calldata. Per FIP-0118 §3.2, the call swaps the payout wallet through an immediate `ReplaceAddress`, so f02 pays the new wallet at once. The Orchestrator identity does not change, and accrued balances are not moved. Update the payout-wallet field in the Orchestrator Registry.
 4. If the `orch` identity cannot file the request, this procedure does not run. There is no `ReplaceWallet` without the public request. `TODO(owners):` any out-of-band identity check, used only toward a fresh admission or a removal review.
@@ -298,10 +298,10 @@ A later return, where one is allowed, is a fresh `AddOrchestrator` with a fresh 
 > **Requires:** both SRA Safes (jointly) · **Hold:** none; bounded by the verification window · **Enforced by:** SRA · **Cancel:** not cancellable
 
 1. Recompute every admitted Orchestrator's `FPV_i(Q)`, posted or not, from public settlement events and registry state. Use the versioned reference indexer when it is published. Until then, the normative algorithm is FIP-0118 §2.2 at the commit pinned in the [README](../README.md). This recomputation is an SRA duty every quarter. It is not triggered only by a dispute (FIP-0118 §2.2 and Security Considerations).
-2. Publish the recomputation on the task-register issue before either Safe approves: chain id, indexer version or the pinned FIP commit, the settlement and registry events, and the blocks covered. Neither Safe signs a `CorrectVolume` that lacks that publication. `TODO(owners):` any minimum time between publication and the first signature. This repository sets none.
+2. Publish the recomputation on the task-register issue before either Safe approves: chain id, indexer version or the pinned FIP commit, the settlement and registry events, and the blocks covered. `TODO(owners): confirm` that neither Safe signs a `CorrectVolume` that lacks that publication. `TODO(owners):` any minimum time between publication and the first signature. This repository sets none.
 3. During the verification window, both Safes jointly call `CorrectVolume(orch, Q, value)` to replace a misreport or supply a figure for a non-poster. A value neither posted nor supplied binds at zero (conservative under-count). The issue carries the canonical calldata and the expected `taskId` before the first approval. An upward correction, or a figure supplied for an Orchestrator that did not post, uses the same publication and states why the figure is the recomputed value. The FIP allows both directions. This repository does not add an approval the contract does not have. `TODO(owners):` who watches for a correction that changes whether the gate passes.
 4. **One Safe can block a correction.** `CorrectVolume` needs both Registry Safes. The window check runs in the function body after approvals are stored (`ServiceRewardsActor.correctVolume`), so a second approval after the window closes reverts and the first approval stays. Aim for both approvals by day 5 of the 7-day mainnet window (scale the same fraction on calibnet). That aim is not a protocol deadline. `TODO(owners):` any earlier internal deadline.
-5. **If the second approval misses the window,** the posted figure, or zero if nothing was posted, binds (FIP-0118 §2.2). The first approver `veto`s the stale task. The Safes publish a "correction blocked" note on the same issue: the Orchestrator, the recomputed figure, and that it did not bind. The note is a removal-review trigger for a poster whose figure was not corrected. If the bound figure passed the gate, reversing the standing w2 step takes a new FIP-backed SWA write paired with the matching `steps` adjustment (FIP-0118, Security Considerations, and §2.2.5). This repository does not pre-authorize that FIP. `TODO(owners):` a reversal template, if one is wanted before it is needed.
+5. **If the second approval misses the window,** the posted figure, or zero if nothing was posted, binds (FIP-0118 §2.2). The first approver `veto`s the stale task. The Safes publish a "correction blocked" note on the same issue: the Orchestrator, the recomputed figure, and that it did not bind. `TODO(owners): confirm` whether that note is a removal-review trigger for a poster whose figure was not corrected. If the bound figure passed the gate, reversing the standing w2 step takes a new FIP-backed SWA write paired with the matching `steps` adjustment (FIP-0118, Security Considerations, and §2.2.5). This repository does not pre-authorize that FIP. `TODO(owners):` a reversal template, if one is wanted before it is needed.
 6. Values bind when the window closes. There is no separate cancellation of a completed correction.
 7. A contested correction is appealed via the [dispute process](04-quarterly-review-and-runbook.md#442-dispute-resolution-for-contested-bindings). The outcome affects only later quarters.
 
@@ -330,7 +330,7 @@ Full procedure and evidence standards: [§4.4.2](04-quarterly-review-and-runbook
 
 1. Trigger: an anomaly in public settlement data, a community report, or a contested binding. This exception audit is not the quarterly recomputation in §2.3.4, and it is not pre-clearance of deals (FIP-0118, Security Considerations).
 2. Investigate: recompute FPV and examine the (payer, operator) relationships. The terms are defined in [§4.4.3](04-quarterly-review-and-runbook.md#443-verification-and-removal).
-3. Decide grounds. Grounds include misreported FPV, binding fraud, and a pattern of wrongful claims (FIP-0118, Security Considerations). Inactivity is a repository ground only once `TODO(owners)` in [Policy 7](03-orchestrator-operational-guidelines.md#31-policies) sets the period.
+3. Decide grounds. Grounds include misreported FPV and a pattern of wrongful claims (FIP-0118, Security Considerations). Binding fraud is a named ground only once `TODO(owners)` in [§4.4.3](04-quarterly-review-and-runbook.md#443-verification-and-removal) defines it. Inactivity is a repository ground only once `TODO(owners)` in [Policy 7](03-orchestrator-operational-guidelines.md#31-policies) sets the period.
 4. Act: `RemoveOrchestrator` (§2.3.2) via the standard registry-change flow. Either Safe may `veto(taskId)` only while the task is half-approved. Once both Safes have approved, removal is not cancellable.
 5. Record the finding and rationale.
 
@@ -352,7 +352,7 @@ Both the admitted lists and the pricing parameters, including `REGISTRATION_CUTO
 
 > **Requires:** both SRA Safes + accepted FIP · **Hold:** `SRA_UPGRADE_HOLD`, 7 days · **Enforced by:** SRA · **Cancel:** either SRA Safe via `veto(taskId)` during the hold
 
-The one registry change that requires a FIP (e.g., the Phase 2 permissionless-admission transition). Otherwise follows the standard flow. The upgrade issue pins the [solstice upgrade runbook](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md) by commit and records the implementation bytecode hash named in the accepted FIP. Both Safes check that hash before approval.
+The one registry change that requires a FIP (e.g., the Phase 2 permissionless-admission transition). Otherwise follows the standard flow. The upgrade issue pins the [solstice upgrade runbook](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md) by commit. FIP-0118 §4.2 requires that the pending upgrade and its execution be observable on chain. `TODO(owners): confirm` whether the issue must also record an implementation bytecode hash.
 
 </details>
 
@@ -502,7 +502,7 @@ The threat model rests on the two-Safes rule: no single Safe can make a discreti
 ### 2.5.1 Key compromise inside a Safe (below the internal threshold)
 
 1. The organization reports publicly in this repository.
-2. Any change the Safe approved while the key was compromised is reviewed. If it is still pending, either Safe cancels it: an SWA write during its hold, or a half-approved task via `veto(taskId)`. An SRA registry change that has already bound cannot be cancelled. The review, and any cancel, is recorded with a written reason.
+2. Any change the Safe approved while the key was compromised is reviewed. If it is still pending, either Safe cancels it: an SWA write during its hold, or a half-approved task via `veto(taskId)`. An SRA registry change that has already bound cannot be cancelled. The review, and any cancel, is recorded on the issue. `TODO(owners): confirm` whether that record includes a written reason.
 3. The organization rotates its internal membership (org-internal, immediate, no governance action) and announces the rotation here.
 
 ### 2.5.2 A whole Safe compromised (internal threshold reached by an attacker)
@@ -518,7 +518,7 @@ Applies to either tier; the mechanics are the same on the SRA and the SWA.
 
 **Cooperative case** (requires both Safes of that contract · hold: none · not cancellable):
 
-1. Veto every open task on that contract first. `removeOwner` does not clear pending approvals; a freed owner bit can recycle to a future owner still carrying old approvals (`Owners.sol`). Every unanimous action shares one pending-task mapping, so this covers code upgrades, registry or gate-parameter changes and owner replacements alike; the task register above lists them. The issue records a sign-off that every open task was vetoed, with a written reason for each veto, before the first `ReplaceOwner` approval.
+1. Veto every open task on that contract first. `removeOwner` does not clear pending approvals; a freed owner bit can recycle to a future owner still carrying old approvals (`Owners.sol`). Every unanimous action shares one pending-task mapping, so this covers code upgrades, registry or gate-parameter changes and owner replacements alike; the task register above lists them. The issue records a sign-off that every open task was vetoed before the first `ReplaceOwner` approval. `TODO(owners): confirm` whether that sign-off includes a written reason for each veto.
 2. Both Safes approve the replacement (`ReplaceOwner`), with the action's chain id, calldata, and `taskId` recorded in the issue before the first approval (see task register above). It binds at once when the second Safe approves.
 3. Record the new Safe in [2.4.1 Safe Addresses](#241-safe-addresses) and the [Program Change Log](06-changelog.md), with the reason for the replacement; a compromise also gets a post-mortem.
 4. Do the engineering items in the [owner change FAQ](https://github.com/filecoin-project/solstice/blob/main/docs/UPGRADE.md#how-do-i-handle-an-owner-change). The issue pins that runbook by commit.
@@ -528,7 +528,7 @@ Applies to either tier; the mechanics are the same on the SRA and the SWA.
 - **Rogue or deadlocked SRA.** SWA Governance re-points the service stream's designated writer to a redeployed SRA (`SetDistribution`, §2.2.4). Registry state is reconstructible from public data. Until that write binds, the incumbent SRA keeps the service-stream flow. The gate keeps reading the previous SRA until an SWA code upgrade changes the wired SRA address (FIP-0118, Security Considerations). That code upgrade is a FIP and a contract upgrade. It is not a network upgrade (FIP-0118 §4.1).
 - **Rogue or deadlocked SWA.** A network upgrade migrates the SWA address in f02 (FIP-0118 §4.3 and §3.1).
 
-`TODO(owners):` ask the FIP authors whether proxy addresses hardwired in Lotus, Forest, and Venus change the SRA path above. Until they answer, operators follow the two paths in this section and do not treat a network upgrade as required for the SRA re-point.
+`TODO(owners):` whether proxy addresses hardwired in Lotus, Forest, and Venus, the question PR #17 raised, change the SRA path in FIP-0118 §4.3.
 
 ### 2.5.4 Both SWA Safes captured
 

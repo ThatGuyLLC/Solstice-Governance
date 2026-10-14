@@ -19,6 +19,8 @@ assignees: ''
 - **Expected taskId:** <keccak256(msg.data)>
 - **Dry-run result:** pending | success | revert — <reason>
 - **Effective epoch:** <epoch, and the paired epoch when the write is half of a w2 / steps pair>
-- **Runbook pin (upgrades only):** <solstice commit of docs/UPGRADE.md, and the implementation bytecode hash named in the FIP>
+- **Runbook pin (upgrades only):** <solstice commit of docs/UPGRADE.md>
+- **Observable on chain (upgrades only):** <how the pending upgrade and its execution will be observable on chain (FIP-0118 §4.2)>
+- **Bytecode hash (upgrades only):** `TODO(owners): confirm` whether to record one
 
 - **Cancel flag raised:** none | <who, when, on what grounds>

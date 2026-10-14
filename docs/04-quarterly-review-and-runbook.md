@@ -25,7 +25,7 @@ Per [§3.1, Policy 9](03-orchestrator-operational-guidelines.md#31-policies), th
 4. Filing deadline: within **7 days after the verification window closes** (after values bind — posting is 3 days then verification 7 days). The reported FPV must match the **bound** value (the `PostVolume` figure, or the `VolumeCorrected` figure if SRA corrected it in-window). A **zero quarter** (no `PostVolume`, because the contract rejects zero) reports bound value 0 with `no message (zero quarter)` and the indexer run as evidence.
 5. On merge, the report is listed in [Section 5, Quarterly Reports](05-quarterly-reports.md).
 
-**If a report is late or incomplete,** failure to file by the deadline is a removal trigger under FIP-0118 and forfeits re-admission for the following quarter. SRA Governance opens a public issue when the deadline passes. This repository does not add a cure period that moves that trigger. A later return, if the Safes admit one, is a fresh `AddOrchestrator` with a fresh application, and it is not available in the forfeited quarter ([§2.3.2](02-solstice-program-governance.md#232--remove-an-orchestrator-removeorchestrator)).
+**If a report is late or incomplete,** SRA Governance opens a public issue and the Orchestrator has the standard response window (7 days) to remedy it before the removal trigger in [§4.4.3](#443-verification-and-removal) is considered. FIP-0118 makes failure to file a removal trigger and forfeits re-admission for the following quarter. The 7-day window is this repository's response step. A later return, if the Safes admit one, is a fresh `AddOrchestrator` with a fresh application, and it is not available in the forfeited quarter ([§2.3.2](02-solstice-program-governance.md#232--remove-an-orchestrator-removeorchestrator)).
 
 ## 4.2 Quarterly report template
 
@@ -184,13 +184,13 @@ The exception audit in §4.4.1(b) is never pre-clearance. A scheduled audit of i
 - Failure to file the quarterly report. The FIP makes this a removal trigger and forfeits re-admission for the following quarter.
 - Misreported FPV. The figure is recomputable from public events. Inside the verification window the remedy is `CorrectVolume`. After binding, the FIP's remedy is audit or removal, with no clawback.
 - A pattern of wrongful claims (FIP-0118, Security Considerations).
-- Binding fraud, as defined below.
+- Binding fraud. `TODO(owners):` define this ground. The FIP does not. It is not a second name for misreported FPV.
 - Inactivity, only after `TODO(owners)` in [Policy 7](03-orchestrator-operational-guidelines.md#31-policies) sets the number of consecutive quarters. Until then, inactivity is not a stated ground.
 
-**Terms.** These follow the FIP. They are not extra sanctions.
+**Terms.**
 
-- **Wrongful claim.** A `RegisterPairs` binding that the dispute process finds the registrant does not serve for that client. While the quarter runs, and the displaced binding's application epoch is in the current quarter or later, the remedy is `ReassignBinding` with `inherit = true` ([§2.3.11](02-solstice-program-governance.md#2311--reassign-a-binding-reassignbinding)).
-- **Binding fraud.** A posted `FPV_i(Q)`, or a binding used to support it, that does not match the figure recomputed from public settlement and registry events.
+- **Wrongful claim.** A `RegisterPairs` binding that the dispute process finds the registrant does not serve for that client. The FIP uses "a claim adjudicated wrongful" and names a pattern of wrongful claims as removal ground. While the quarter runs, and the displaced binding's application epoch is in the current quarter or later, the remedy is `ReassignBinding` with `inherit = true` ([§2.3.11](02-solstice-program-governance.md#2311--reassign-a-binding-reassignbinding)).
+- **Binding fraud.** `TODO(owners):` define this ground. The FIP does not define it. The definition is not misreported FPV.
 - **Wash trading and self-dealing.** The off-chain judgment FIP-0118 assigns to SRA Governance: distinguishing genuine client demand from circular payments between colluding parties. `TODO(owners):` any indicative numeric thresholds used only as review triggers. This repository sets none, and a threshold would not be an automatic finding.
 
 The evidence for a relationship is the list in [§4.4.2](#442-dispute-resolution-for-contested-bindings). `TODO(owners):` any stricter minimum per outcome.
@@ -200,7 +200,7 @@ The evidence for a relationship is the list in [§4.4.2](#442-dispute-resolution
 - A public-data anomaly surfaced by the quarterly FPV recomputation or by monitoring (volume spikes at quarter or gate boundaries, figures that clear the target by a hair, volume with no matching storage activity). These phrases are review triggers, not automatic findings, and they have no numeric cutoff in this repository. `TODO(owners):` indicative thresholds, if the Safes want them published as triggers only.
 - A community report filed as an issue in this repository.
 - A contested binding escalated from the dispute process.
-- A "correction blocked" note under [§2.3.4](02-solstice-program-governance.md#234--quarterly-fpv-verification--correction-correctvolume).
+- A "correction blocked" note under [§2.3.4](02-solstice-program-governance.md#234--quarterly-fpv-verification--correction-correctvolume), if the owners confirm that it is a trigger.
 
 ### 4.4.5 Escalation
 
